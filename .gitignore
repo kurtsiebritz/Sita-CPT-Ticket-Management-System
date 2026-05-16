@@ -1,0 +1,33 @@
+# Build results
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+
+# Database files
+*.mdf
+*.ldf
+*.bak
+
+# Data Protection Keys
+Keys/
+
+# User secrets and production settings
+secrets.json
+appsettings.Production.json
+appsettings.*.json
+
+# Logs
+*.log
+
+# Visual Studio
+.vs/
+.vscode/
+
+# NuGet packages
+packages/
+
+# macOS / Windows junk
+.DS_Store
+Thumbs.db

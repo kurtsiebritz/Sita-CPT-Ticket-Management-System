@@ -1,0 +1,197 @@
+﻿@model SitaCptTicketApp.Controllers.HowToViewModel
+@{
+    ViewData["Title"] = "Create How-To";
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">Create How-To</h1>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        <form asp-action="Create" method="post" enctype="multipart/form-data" id="create-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CompanyId" class="control-label">Company</label>
+                <select asp-for="CompanyId" class="form-control" asp-items="@(new SelectList(Model.Companies.Items, "Id", "CompanyName", Model.CompanyId))">
+                    <option value="">Select a company</option>
+                </select>
+                <span asp-validation-for="CompanyId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedById" class="control-label">Created By</label>
+                <select asp-for="CreatedById" class="form-control" asp-items="@(new SelectList(Model.TeamMembers.Items, "Id", "Name", Model.CreatedById))">
+                    <option value="">Select a team member</option>
+                </select>
+                <span asp-validation-for="CreatedById" class="text-danger"></span>
+            </div>
+            <div id="steps-container">
+                @for (int i = 0; i < Model.Steps.Count; i++)
+                {
+                    <div class="card mb-3 step-card" data-step-index="@i">
+                        <div class="card-header">
+                            Step @(Model.Steps[i].OrderIndex)
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label asp-for="Steps[i].Instructions" class="control-label"></label>
+                                <textarea asp-for="Steps[i].Instructions" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="Steps[i].Instructions" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Image (optional)</label>
+                                <input type="file" name="Steps[@i].Image" accept=".jpg,.jpeg,.png" class="form-control-file" />
+                            </div>
+                            @if (i > 0)
+                            {
+                                <button type="button" class="btn btn-danger btn-sm remove-step mt-2">Remove Step</button>
+                            }
+                            <input type="hidden" asp-for="Steps[i].OrderIndex" />
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="form-group">
+                <button type="button" id="add-step" class="btn btn-secondary">Add Step</button>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" value="Create" class="btn btn-sita" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 1200px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-control, .form-control-file {
+        font-size: 14px;
+    }
+
+    .text-danger {
+        font-size: 12px;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        font-weight: 500;
+    }
+
+    .alert-danger, .alert-success {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $.validator.unobtrusive.parse('#create-form');
+
+            // Ensure image inputs are not required client-side
+            $('#create-form input[type="file"]').rules('remove', 'required');
+
+            // Log CompanyId selection
+            $('select[name="CompanyId"]').on('change', function () {
+                console.log('CompanyId selected: ' + this.value);
+            });
+
+            // Log CreatedById selection
+            $('select[name="CreatedById"]').on('change', function () {
+                console.log('CreatedById selected: ' + this.value);
+            });
+
+            // Log file selection
+            $(document).on('change', 'input[type="file"]', function (e) {
+                console.log(`File selected for ${e.target.name}: `, e.target.files[0]?.name, e.target.files[0]?.size);
+            });
+
+            // Log form submission
+            $('#create-form').on('submit', function (e) {
+                console.log('Form submission attempted');
+                var formData = new FormData(this);
+                for (var pair of formData.entries()) {
+                    console.log(`FormData: ${pair[0]} = ${pair[1].name || pair[1]}`);
+                }
+            });
+
+            // Add new step
+            $('#add-step').on('click', function () {
+                var container = $('#steps-container');
+                var stepCount = container.find('.step-card').length;
+                var newStepIndex = stepCount;
+                var newStep = `
+                            <div class="card mb-3 step-card" data-step-index="${newStepIndex}">
+                                <div class="card-header">Step ${stepCount + 1}</div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label class="control-label" for="Steps_${newStepIndex}__Instructions">Instructions</label>
+                                        <textarea id="Steps_${newStepIndex}__Instructions" name="Steps[${newStepIndex}].Instructions" class="form-control" rows="4" data-val="true" data-val-required="Instructions are required."></textarea>
+                                        <span class="text-danger field-validation-valid" data-valmsg-for="Steps[${newStepIndex}].Instructions" data-valmsg-replace="true"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Image (optional)</label>
+                                        <input type="file" name="Steps[${newStepIndex}].Image" accept=".jpg,.jpeg,.png" class="form-control-file" />
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm remove-step mt-2">Remove Step</button>
+                                    <input type="hidden" name="Steps[${newStepIndex}].OrderIndex" value="${stepCount + 1}" />
+                                </div>
+                            </div>`;
+                container.append(newStep);
+                $.validator.unobtrusive.parse(container);
+                console.log(`Added step ${stepCount + 1}`);
+            });
+
+            // Remove step
+            $(document).on('click', '.remove-step', function () {
+                var stepCard = $(this).closest('.step-card');
+                var removedIndex = stepCard.data('step-index');
+                stepCard.remove();
+                console.log(`Removed step ${removedIndex + 1}`);
+
+                // Reindex remaining steps
+                $('#steps-container .step-card').each(function (index) {
+                    $(this).data('step-index', index);
+                    $(this).find('.card-header').text(`Step ${index + 1}`);
+                    $(this).find('input[name*="OrderIndex"]').attr('name', `Steps[${index}].OrderIndex`).val(index + 1);
+                    $(this).find('textarea[name*="Instructions"]').attr('name', `Steps[${index}].Instructions`).attr('id', `Steps_${index}__Instructions`);
+                    $(this).find('span[data-valmsg-for*="Instructions"]').attr('data-valmsg-for', `Steps[${index}].Instructions`);
+                    $(this).find('input[name*="Image"]').attr('name', `Steps[${index}].Image`);
+                });
+
+                $.validator.unobtrusive.parse('#steps-container');
+            });
+        });
+    </script>
+}

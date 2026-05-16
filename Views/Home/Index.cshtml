@@ -1,0 +1,1195 @@
+﻿@using System.Text.Json
+@{
+    ViewData["Title"] = "Team Dashboard";
+    var leaderboardData = ViewBag.LeaderboardData as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var concerns = ViewBag.Concerns ?? new
+    {
+        TicketsThisMonth = "0",
+        MostFrequentLocation = "None",
+        LastMonthWinner = "No data",
+        DaysLeftInMonth = (DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month) - DateTime.Now.Day).ToString()
+    };
+    var notices = ViewBag.Notices as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var contactLists = ViewBag.DisplayContactLists as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SitaCptTicketApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fortawesome/fontawesome-free@6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+</head>
+<body>
+<main>
+    <div class="main-container">
+            <div class="gate-contacts-container">
+                <div class="card gate-contacts">
+                    <h2 class="card-title">Contact Lists</h2>
+                    <div class="gate-buttons">
+                        <button class="btn btn-sita gate-btn" onclick="scrollToGate('a-gates')">A</button>
+                        <button class="btn btn-sita gate-btn" onclick="scrollToGate('b-gates')">B</button>
+                        <button class="btn btn-sita gate-btn" onclick="scrollToGate('c-gates')">C</button>
+                    </div>
+                    <div class="gate-contacts-scrollable">
+                        <h3 class="gate-subtitle" id="a-gates">A Gates</h3>
+                        <ul class="gate-list">
+                            <li class="gate-item">Gate A3: 2043</li>
+                            <li class="gate-item">Gate A4: 2044</li>
+                            <li class="gate-item">Gate A5: 2045</li>
+                            <li class="gate-item">Gate A6: 2046</li>
+                            <li class="gate-item">Gate A7: 2047</li>
+                            <li class="gate-item">Gate A8: 2011</li>
+                            <li class="gate-item">Gate A9: 2012</li>
+                            <li class="gate-item">Gate A10: 2013</li>
+                            <li class="gate-item">Gate A11: 2014</li>
+                            <li class="gate-item">Gate A12: 2015</li>
+                        </ul>
+                        <h3 class="gate-subtitle" id="b-gates">B Gates</h3>
+                        <ul class="gate-list">
+                            <li class="gate-item">B1: 2031</li>
+                            <li class="gate-item">B2: 2032</li>
+                            <li class="gate-item">B3: 2033</li>
+                            <li class="gate-item">B4: 2034</li>
+                            <li class="gate-item">B5: 2035</li>
+                        </ul>
+                        <h3 class="gate-subtitle" id="c-gates">C Gates</h3>
+                        <ul class="gate-list">
+                            <li class="gate-item">C1: 2001</li>
+                            <li class="gate-item">C2: 2002</li>
+                            <li class="gate-item">C3: 2003</li>
+                            <li class="gate-item">C4: 2004</li>
+                            <li class="gate-item">C5: 2005</li>
+                            <li class="gate-item">C6: 2006</li>
+                            <li class="gate-item">C7: 2007</li>
+                            <li class="gate-item">C8: 2008</li>
+                            <li class="gate-item">C9: 2009</li>
+                            <li class="gate-item">C10: 2010</li>
+                            <li class="gate-item">C11: 2016</li>
+                            <li class="gate-item">C12: 2017</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        <div class="dashboard-content">
+            <h1 class="page-title">Team Dashboard</h1>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Tickets This Month</h3>
+                    <p>@concerns.TicketsThisMonth</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Most Frequent Location</h3>
+                    <p>@concerns.MostFrequentLocation</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Last Month's Winner</h3>
+                    <p>@concerns.LastMonthWinner</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Days Left in Month</h3>
+                    <p>@concerns.DaysLeftInMonth</p>
+                </div>
+            </div>
+
+            <!-- Leaderboard -->
+            <div class="card">
+                @if (leaderboardData.Any())
+                {
+                    <h2 class="card-title">Ticket Leaderboard</h2>
+                    <p class="card-subtitle">June</p>
+                    <script data-leaderboard>
+                        window.leaderboardData = @Html.Raw(JsonSerializer.Serialize(ViewBag.LeaderboardData)) || [];
+                    </script>
+                    <canvas id="leaderboardChart" height="300"></canvas>
+                    <div id="chartError" class="no-data" style="display: none;">Unable to display leaderboard chart due to data issues.</div>
+                }
+                else
+                {
+                    <p class="no-data">No leaderboard data available for this month.</p>
+                }
+            </div>
+
+            <!-- Team Members -->
+            <div class="card">
+                <h2 class="card-title">Team Members</h2>
+                <div class="team-grid">
+                    @if (leaderboardData.Any())
+                    {
+                        @foreach (var item in leaderboardData)
+                        {
+                            <a href="/Home/TeamMemberDetails?name=@item.Employee" class="team-card">
+                                <h3>@item.Employee</h3>
+                                <p>Tickets: @item.TicketCount</p>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <p class="no-data">No team members to display.</p>
+                    }
+                </div>
+            </div>
+        </div>
+            <div class="notice-board-container">
+                <div class="card notice-board">
+                    <h2 class="card-title">Notice Board</h2>
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    <button class="btn btn-sita" onclick="openNoticeModal()">Add Notice</button>
+                    @if (notices.Any())
+                    {
+                        <div class="notice-section">
+                            <h3 class="notice-subtitle">Messages</h3>
+                            <hr class="notice-divider" />
+                            <ul class="notice-list">
+                                @foreach (var notice in notices)
+                                {
+                                    <li class="notice-item">
+                                        <div class="notice-content">
+                                            <div class="notice-meta">
+                                                <span class="notice-time">Posted by @notice.PostedBy at @notice.PostedDate.ToString("HH:mm")</span>
+                                                <span class="notice-date">@notice.PostedDate.ToString("yyyy-MM-dd")</span>
+                                            </div>
+                                            <p class="notice-message">@notice.Message</p>
+                                            @if (!string.IsNullOrEmpty(notice.FileName))
+                                            {
+                                                <p class="file-attachment">
+                                                    <a href="/Home/DownloadFile?id=@notice.Id" class="file-link" title="@notice.FileName" target="_blank">
+                                                        <img src="/images/attachment-Icon.jpg" alt="Attachment" class="attachment-icon" />
+                                                        Attachment
+                                                    </a>
+                                                    <span>(@((notice.FileSize / 1024.0).ToString("F2")) KB)</span>
+                                                </p>
+                                            }
+                                            <div class="notice-menu">
+                                                <button class="menu-btn" onclick="toggleDropdown('dropdown-@notice.Id')">
+                                                    <i class="fas fa-ellipsis-h"></i>
+                                                </button>
+                                                <div id="dropdown-@notice.Id" class="dropdown-menu">
+                                                    <form id="delete-form-@notice.Id" asp-action="DeleteNotice" method="post">
+                                                        <input type="hidden" name="id" value="@notice.Id" />
+                                                        <button type="button" class="dropdown-item" onclick="confirmDelete('@notice.Id')">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="no-notices">No messages for the next shift.</p>
+                    }
+                </div>
+            </div>
+    </div>
+</main>
+
+<!-- Add Notice Modal -->
+<div id="noticeModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <span class="custom-close" onclick="closeNoticeModal()">×</span>
+        <h2>Add Notice for Next Shift</h2>
+        <div id="modalError" class="alert alert-danger" style="display: none;"></div>
+        <form id="noticeForm" asp-action="PostNotice" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" class="form-control" rows="5" required placeholder="Enter message for the next shift"></textarea>
+                <span class="text-danger field-validation-error" data-valmsg-for="message"></span>
+            </div>
+            <div class="form-group">
+                <label for="postedBy">Posted By</label>
+                <input id="postedBy" name="postedBy" class="form-control" required placeholder="Your name" />
+                <span class="text-danger field-validation-error" data-valmsg-for="postedBy"></span>
+            </div>
+            <div class="form-group">
+                <label for="file">Attachment (PDF, DOC, DOCX, JPG, PNG; max 5 MB, optional)</label>
+                <input type="file" id="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                <span id="fileError" class="text-danger" style="display: none;"></span>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-sita">Save Notice</button>
+                <button type="button" class="btn btn-secondary" onclick="closeNoticeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Success</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <text>@TempData["SuccessMessage"]</text>
+                }
+                else if (TempData["DeleteSuccessMessage"] != null)
+                {
+                    <text>Notice Deleted Successfully</text>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary: #003087;
+        --accent: #0058cc;
+        --secondary: #6c757d;
+        --danger: #dc3545;
+        --text: #333333;
+        --text-secondary: #666666;
+        --card-bg: #ffffff;
+        --background: #f5f7fa;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        background: var(--background);
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-container {
+        display: grid;
+        grid-template-columns: 20% 50% 30%;
+        width: 100%;
+        margin: 0 0 40px;
+        box-sizing: border-box;
+    }
+
+    .gate-contacts-container {
+        grid-column: 1 / 2;
+        padding: 85px 15px 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .gate-contacts {
+        max-width: 90%;
+        padding: 20px;
+        width: 100%;
+    }
+
+    .gate-subtitle {
+        font-size: 16px;
+        color: var(--primary);
+        font-weight: 600;
+        margin: 15px 0 5px;
+        padding: 5px 10px;
+        background: #e6f0fa;
+        border-radius: 4px;
+    }
+
+    .gate-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .gate-item {
+        font-size: 14px;
+        color: var(--text);
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e7f0;
+    }
+
+    .dashboard-content {
+        grid-column: 2 / 3;
+        padding: 20px 15px 0;
+    }
+
+    .notice-board-container {
+        grid-column: 3 / 4;
+        position: sticky;
+        top: 170px;
+        align-self: start;
+        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .notice-board {
+        max-width: 90%;
+        padding: 20px;
+        width: 100%;
+    }
+
+    .page-title {
+        font-size: 32px;
+        color: var(--primary);
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .stat-card h3 {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .stat-card p {
+        font-size: 28px;
+        color: var(--primary);
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-title {
+        font-size: 24px;
+        color: var(--primary);
+        margin-bottom: 10px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .card-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    #leaderboardChart {
+        width: 100%;
+        max-height: 300px;
+    }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .team-card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease;
+    }
+
+    .team-card:hover {
+        transform: scale(1.03);
+        background: #f8f9fa;
+    }
+
+    .team-card h3 {
+        font-size: 16px;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .team-card p {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .notice-section {
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 5px;
+        margin-top: 10px;
+    }
+
+    .notice-subtitle {
+        font-size: 14px;
+        color: var(--text);
+        margin: 10px 0 5px;
+        font-weight: 500;
+    }
+
+    .notice-divider {
+        border: 0;
+        border-top: 1px solid #b0bec5;
+        margin: 10px 0;
+    }
+
+    .notice-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .notice-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 10px 0;
+        border-bottom: 1px solid #e0e7f0;
+        position: relative;
+    }
+
+    .notice-content {
+        flex: 1;
+        position: relative;
+        padding-right: 10px;
+    }
+
+    .notice-message {
+        margin: 10px 0 15px 0;
+        font-size: 14px;
+        color: var(--text);
+    }
+
+    .file-attachment {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin: 10px 0 5px 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .attachment-icon {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        margin-right: 4px;
+    }
+
+    .file-link {
+        color: var(--accent);
+        text-decoration: none;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .file-link:hover {
+        color: var(--primary);
+        text-decoration: underline;
+    }
+
+    .notice-meta {
+        font-size: 12px;
+        color: var(--text-secondary);
+        display: block;
+        margin-bottom: 15px;
+    }
+
+        .notice-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .notice-time {
+            flex: 1;
+        }
+
+        .notice-date {
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+    .notice-menu {
+        position: absolute;
+        bottom: 5px;
+        right: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--text-secondary);
+        padding: 2px 5px;
+        transition: color 0.2s ease;
+    }
+
+    .menu-btn:hover {
+        color: var(--text);
+    }
+
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        background: var(--card-bg);
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        min-width: 100px;
+        z-index: 1000;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        background: none;
+        border: none;
+        padding: 10px 15px;
+        text-align: left;
+        width: 100%;
+        font-size: 14px;
+        color: var(--danger);
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+
+        .gate-contacts-scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+    .no-notices, .no-data {
+        font-size: 14px;
+        color: var(--text-secondary);
+        text-align: center;
+        margin: 15px 0;
+    }
+
+    .urgent-ticket {
+        background: #fff3f3;
+        padding: 5px;
+        border-left: 3px solid var(--danger);
+        border-radius: 3px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s ease;
+    }
+
+    .btn-sita {
+        background: var(--accent);
+        color: #fff;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .btn-sita:hover {
+        background: var(--primary);
+    }
+
+    .btn-secondary {
+        background: var(--secondary);
+        color: #fff;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: #fff;
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .alert {
+        font-size: 14px;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .modal-backdrop {
+        opacity: 0.3 !important;
+    }
+
+    .custom-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+
+    .custom-modal-content {
+        background: var(--card-bg);
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-close {
+        color: var(--text-secondary);
+        float: right;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .custom-close:hover {
+        color: var(--text);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        color: var(--text);
+        margin-bottom: 5px;
+        display: block;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e0e7f0;
+        border-radius: 5px;
+        font-size: 14px;
+        color: var(--text);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .field-validation-error {
+        display: block;
+        font-size: 12px;
+        color: var(--danger);
+        margin-top: 5px;
+    }
+
+    @@media (max-width: 1200px) {
+        .main-container {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .gate-contacts-container {
+            grid-column: 1 / 2;
+            padding: 15px 15px 0;
+            display: block;
+        }
+
+        .gate-contacts {
+            max-width: 100%;
+        }
+
+        .dashboard-content {
+            grid-column: 1 / 2;
+            padding: 15px 15px 0;
+        }
+
+        .notice-board-container {
+            grid-column: 1 / 2;
+            position: static;
+            padding: 0 15px;
+            display: block;
+        }
+
+        .notice-board {
+            max-width: 100%;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .team-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .main-container {
+            margin: 0 0 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .team-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card, .notice-board, .gate-contacts {
+            padding: 15px;
+        }
+
+        .stat-card, .team-card {
+            padding: 15px;
+        }
+
+        .custom-modal-content {
+            margin: 20% auto;
+            padding: 15px;
+            max-width: 90%;
+        }
+
+        .stat-card p {
+            font-size: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+        }
+
+            .gate-buttons {
+                display: flex;
+                justify-content: flex-start;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+
+            .gate-btn {
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                font-size: 12px;
+                border-radius: 6px;
+                text-align: center;
+                line-height: 24px;
+            }
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-gradient@0.1.0/dist/chartjs-plugin-gradient.min.js"></script>
+    <script>
+        console.log('Script execution started');
+        let chartInstance = null;
+
+                function scrollToGate(gateId) {
+                    const element = document.getElementById(gateId);
+                    if (element) {
+                        const scrollableContainer = element.closest('.gate-contacts-scrollable');
+                        if (scrollableContainer) {
+                            scrollableContainer.scrollTo({
+                                top: element.offsetTop - scrollableContainer.offsetTop,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }
+
+        function initializeChart() {
+            const debug = true;
+            console.log('initializeChart called');
+            const canvas = document.getElementById('leaderboardChart');
+            const chartError = document.getElementById('chartError');
+            if (!canvas) {
+                console.error('Leaderboard chart canvas not found');
+                chartError.style.display = 'block';
+                return;
+            }
+
+            let rawData;
+            try {
+                console.log('Window.leaderboardData type:', typeof window.leaderboardData);
+                if (!window.leaderboardData) throw new Error('Leaderboard data is undefined');
+                rawData = window.leaderboardData || [];
+            } catch (e) {
+                console.error('Error accessing leaderboard data:', e);
+                chartError.style.display = 'block';
+                return;
+            }
+
+            try {
+                JSON.parse(JSON.stringify(rawData));
+                console.log('Leaderboard data is valid JSON');
+            } catch (e) {
+                console.error('Leaderboard data is invalid JSON:', e);
+                chartError.style.display = 'block';
+                return;
+            }
+
+            if (debug) console.log('Raw leaderboard data:', JSON.stringify(rawData, null, 2));
+
+            if (!Array.isArray(rawData)) {
+                console.error('Leaderboard data is not an array:', rawData);
+                if (debug) {
+                    const scriptElement = document.querySelector('script[data-leaderboard]');
+                    console.log('Raw HTML output for leaderboard data:', scriptElement?.outerHTML.substring(0, 200));
+                }
+                chartError.style.display = 'block';
+                return;
+            }
+
+            if (rawData.length === 0) {
+                console.warn('Leaderboard data is empty');
+                chartError.style.display = 'block';
+                return;
+            }
+
+            const validItems = rawData.map((item, index) => {
+                if (!item) {
+                    if (debug) console.warn(`Item at index ${index} is null or undefined`);
+                    return null;
+                }
+
+                let employee = null;
+                for (let key in item) {
+                    if (key.toLowerCase().includes('employee') || key.toLowerCase().includes('name')) {
+                        employee = item[key];
+                        break;
+                    }
+                }
+                employee = employee ?? 'Unknown';
+
+                let ticketCount = null;
+                for (let key in item) {
+                    if (key.toLowerCase().includes('ticketcount') || key.toLowerCase().includes('count')) {
+                        ticketCount = item[key];
+                        break;
+                    }
+                }
+                const parsedTicketCount = Number(ticketCount) || 0;
+
+                if (debug) console.log(`Item ${index} processed: { employee: "${employee}", ticketCount: ${parsedTicketCount} }`);
+
+                return { employee, ticketCount: parsedTicketCount };
+            }).filter((item, index) => {
+                if (!item) return false;
+                const isValid = item.employee && typeof item.employee === 'string' && item.employee.trim() !== '' && 
+                                !isNaN(item.ticketCount) && item.ticketCount >= 0;
+                if (!isValid && debug) {
+                    console.warn(`Validation failed for item at index ${index}:`, item);
+                }
+                return isValid;
+            });
+
+            if (validItems.length === 0) {
+                console.error('No valid leaderboard items after filtering:', rawData);
+                chartError.style.display = 'block';
+                return;
+            }
+
+            if (debug) console.log('Valid items:', JSON.stringify(validItems, null, 2));
+
+            const labels = validItems.map(item => item.employee);
+            const ticketCounts = validItems.map(item => item.ticketCount);
+
+            const ctx = canvas.getContext('2d');
+            canvas.height = 300;
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            try {
+                Chart.register(window.ChartGradientPlugin);
+            } catch (e) {
+                console.error('Failed to register ChartGradientPlugin:', e);
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: ticketCounts,
+                        backgroundColor: function(context) {
+                            try {
+                                const chart = context.chart;
+                                const gradient = ctx.createLinearGradient(0, 0, 0, chart.height);
+                                gradient.addColorStop(0, '#0058cc');
+                                gradient.addColorStop(1, '#003087');
+                                return gradient;
+                            } catch (e) {
+                                console.error('Error creating gradient:', e);
+                                return '#003087';
+                            }
+                        },
+                        borderColor: '#003087',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        hoverBackgroundColor: '#0058cc',
+                        hoverBorderColor: '#003087'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Tickets',
+                                font: { size: 16, weight: 'bold', family: 'Roboto' },
+                                color: '#003087'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                font: { size: 14, family: 'Roboto' },
+                                color: '#666'
+                            },
+                            grid: { color: '#e0e7f0', borderDash: [5, 5] }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 14, family: 'Roboto' },
+                                color: '#666'
+                            },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: false }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuad'
+                    }
+                }
+            });
+            console.log('Leaderboard chart initialized with', validItems.length, 'items');
+            chartError.style.display = 'none';
+        }
+
+        function openNoticeModal() {
+            document.getElementById('noticeModal').style.display = 'block';
+            console.log('Notice modal opened');
+        }
+
+        function closeNoticeModal() {
+            document.getElementById('noticeModal').style.display = 'none';
+            document.getElementById('modalError').style.display = 'none';
+            document.getElementById('fileError').style.display = 'none';
+            console.log('Notice modal closed');
+        }
+
+        window.onclick = function(event) {
+            const noticeModal = document.getElementById('noticeModal');
+            const contactListModal = document.getElementById('contactListModal');
+            const contactModal = document.getElementById('contactModal');
+            if (event.target === noticeModal) {
+                closeNoticeModal();
+            }
+            if (event.target === contactListModal) {
+                closeContactListModal();
+            }
+            if (event.target === contactModal) {
+                closeContactModal();
+            }
+        };
+
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            const isShown = dropdown.classList.contains('show');
+            closeAllDropdowns();
+            if (!isShown) {
+                dropdown.classList.add('show');
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+
+        function confirmDelete(noticeId) {
+            if (confirm('Are you sure you want to delete this notice?')) {
+                const form = document.getElementById(`delete-form-${noticeId}`);
+                if (form) {
+                    form.submit();
+                } else {
+                    console.error(`Delete form for notice ${noticeId} not found`);
+                }
+            }
+            closeAllDropdowns();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM content loaded');
+            try {
+                initializeChart();
+            } catch (e) {
+                console.error('Error initializing leaderboard chart:', e);
+                document.getElementById('chartError').style.display = 'block';
+            }
+
+            const noticeForm = document.getElementById('noticeForm');
+            const fileInput = document.getElementById('file');
+            const fileError = document.getElementById('fileError');
+            const modalError = document.getElementById('modalError');
+            const messageInput = document.getElementById('message');
+            const postedByInput = document.getElementById('postedBy');
+
+            if (noticeForm) {
+                noticeForm.addEventListener('submit', function(e) {
+                    let isValid = true;
+                    modalError.textContent = '';
+
+                    if (!messageInput.value.trim()) {
+                        modalError.textContent = 'Message is required.';
+                        modalError.style.display = 'block';
+                        isValid = false;
+                    }
+
+                    if (!postedByInput.value.trim()) {
+                        modalError.textContent = modalError.textContent ? 
+                            modalError.textContent + ' Posted By is required.' : 
+                            'Posted By is required.';
+                        modalError.style.display = 'block';
+                        isValid = false;
+                    }
+
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        const maxSize = 5 * 1024 * 1024;
+                        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'];
+
+                        if (file.size > maxSize) {
+                            fileError.textContent = 'File size exceeds 5 MB.';
+                            fileError.style.display = 'block';
+                            isValid = false;
+                        } else if (!allowedTypes.includes(file.type)) {
+                            fileError.textContent = 'Invalid file type. Allowed: PDF, DOC, DOCX, JPG, PNG.';
+                            fileError.style.display = 'block';
+                            isValid = false;
+                        } else {
+                            fileError.style.display = 'none';
+                        }
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        console.warn('Form submission prevented due to validation errors');
+                    }
+                });
+            }
+
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.notice-menu')) {
+                    closeAllDropdowns();
+                }
+            });
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <text>
+                document.getElementById('modalError').textContent = '@Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"].ToString()))';
+                document.getElementById('modalError').style.display = 'block';
+                openNoticeModal();
+                console.error('Error message displayed:', '@Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"].ToString()))');
+                </text>
+            }
+
+            @if (TempData["SuccessMessage"] != null || TempData["DeleteSuccessMessage"] != null)
+            {
+                <text>
+                var successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                    keyboard: false
+                });
+                successModal.show();
+                </text>
+            }
+        });
+    </script>
+}
+</body>
+</html>

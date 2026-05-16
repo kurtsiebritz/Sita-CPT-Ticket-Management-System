@@ -1,0 +1,435 @@
+﻿@model SitaCptTicketApp.Models.Ticket
+@{
+    ViewData["Title"] = "Add Incident";
+    var incidentText = ViewBag.IncidentText as string ?? string.Empty;
+    var loggedInUserFullName = ViewBag.LoggedInUserFullName as string ?? string.Empty;
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">Add Incident</h1>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <form asp-action="ParseIncident" method="post">
+            <div class="mb-3">
+                <label for="IncidentText" class="form-label">Paste Incident Email Text</label>
+                <textarea id="IncidentText" name="IncidentText" class="form-control" rows="10" placeholder="Paste the email text here...">@incidentText</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sita">Parse Incident</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+
+        @if (Model != null && !string.IsNullOrEmpty(Model.IncidentNumber))
+        {
+            <hr />
+            <h3 class="ticket-subtitle">Parsed Incident Details</h3>
+            <form asp-action="SaveIncident" method="post" id="saveIncidentForm">
+                <input type="hidden" asp-for="IncidentNumber" />
+                <input type="hidden" asp-for="Priority" />
+                <input type="hidden" asp-for="OpenTime" value="@Model.OpenTime.ToString("yyyy-MM-dd HH:mm:ss")" />
+                <input type="hidden" asp-for="Product" />
+                <input type="hidden" asp-for="Module" />
+                <input type="hidden" asp-for="AffectedEndUser" />
+                <input type="hidden" asp-for="CallerName" />
+                <input type="hidden" asp-for="CallerPhone" />
+                <input type="hidden" asp-for="ShortDescription" />
+                <input type="hidden" asp-for="PositionLocation" />
+                <input type="hidden" asp-for="IssueDescription" />
+                <input type="hidden" name="IncidentText" value="@incidentText" />
+                <input type="hidden" asp-for="ResolutionId" id="ResolutionIdHidden" />
+                <input type="hidden" asp-for="Employee" />
+
+                <div class="mb-3">
+                    <label class="form-label">Incident Number</label>
+                    <input asp-for="IncidentNumber" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Priority</label>
+                    <input asp-for="Priority" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Open Time</label>
+                    <input class="form-control parsed-field" readonly type="text" value="@Model.OpenTime.ToString("yyyy-MM-dd HH:mm:ss")" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Product</label>
+                    <input asp-for="Product" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Module</label>
+                    <input asp-for="Module" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Affected End User</label>
+                    <input asp-for="AffectedEndUser" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Caller Name</label>
+                    <input asp-for="CallerName" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Caller Phone</label>
+                    <input asp-for="CallerPhone" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ShortDescription" class="form-label">Short Description</label>
+                    <input asp-for="ShortDescription" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PositionLocation" class="form-label">Position / Location</label>
+                    <input asp-for="PositionLocation" class="form-control parsed-field" readonly id="PositionLocation" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="IssueDescription" class="form-label">Issue Description (What was the issue?)</label>
+                    <textarea asp-for="IssueDescription" class="form-control parsed-field" rows="4" readonly></textarea>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ResolutionId" class="form-label">Resolution</label>
+                    <select asp-for="ResolutionId" id="ResolutionId" name="ResolutionId" class="form-control editable-field" asp-items="ViewBag.Resolutions">
+                        <option value="">Select a resolution</option>
+                    </select>
+                    <span asp-validation-for="ResolutionId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Comments" class="form-label">Comments</label>
+                    <select asp-for="Comments" class="form-control editable-field" id="Comments" name="Comments">
+                        <option value="">Select a comment</option>
+                    </select>
+                    <span asp-validation-for="Comments" class="text-danger"></span>
+                </div>
+                <div class="mb-3" id="customCommentDiv" style="display: none;">
+                    <label for="customComment" class="form-label">Custom Comment</label>
+                    <input type="text" name="customComment" id="customComment" class="form-control editable-field" />
+                    <span id="customCommentValidation" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ErrorCode" class="form-label">Error Code</label>
+                    <input asp-for="ErrorCode" class="form-control parsed-field" readonly />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="CloseTime" class="form-label">Close Time (When was it solved?)</label>
+                    <input asp-for="CloseTime" class="form-control editable-field" type="datetime-local" required />
+                    <span asp-validation-for="CloseTime" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Employee" class="form-label">Employee</label>
+                    <input asp-for="Employee" class="form-control parsed-field" readonly />
+                    <span asp-validation-for="Employee" class="text-danger"></span>
+                </div>
+                <button type="submit" name="submitAction" value="Save" class="btn btn-success btn-sita-success">Save Ticket</button>
+                <button type="submit" name="submitAction" value="SaveAndAddAnother" class="btn btn-primary btn-sita">Save and Add Another</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        }
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 800px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .ticket-subtitle {
+        font-size: 20px;
+        font-weight: 500;
+        color: #333;
+        margin-top: 24px;
+        margin-bottom: 16px;
+    }
+
+    .btn-sita {
+        background-color: #003087;
+        border-color: #003087;
+        font-weight: 500;
+    }
+
+        .btn-sita:hover {
+            background-color: #00205b;
+            border-color: #00205b;
+        }
+
+    .btn-sita-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        font-weight: 500;
+    }
+
+        .btn-sita-success:hover {
+            background-color: #218838;
+            border-color: #218838;
+        }
+
+    .form-control {
+        font-size: 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        transition: border-color 0.2s;
+    }
+
+        .form-control:focus {
+            border-color: #003087;
+            box-shadow: 0 0 0 2px rgba(0, 48, 135, 0.1);
+        }
+
+    .parsed-field {
+        background-color: #f0f0f0;
+        cursor: not-allowed;
+    }
+
+    .editable-field {
+        border-color: #0058cc;
+        box-shadow: 0 0 0 2px rgba(0, 88, 204, 0.1);
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .text-danger {
+        font-size: 12px;
+    }
+
+    .alert {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            console.log('AddIncident: Page loaded at ' + new Date().toISOString());
+
+            var $resolutionSelect = $('#ResolutionId');
+            var $commentsSelect = $('#Comments');
+            var $errorCodeInput = $('#ErrorCode');
+            var $customCommentDiv = $('#customCommentDiv');
+            var $customCommentInput = $('#customComment');
+            var $customCommentValidation = $('#customCommentValidation');
+            var $form = $('#saveIncidentForm');
+            var $resolutionHidden = $('#ResolutionIdHidden');
+
+            // Log parsed fields for debugging
+            $('.parsed-field').each(function () {
+                var $field = $(this);
+                var fieldId = $field.attr('id') || $field.attr('name') || 'unnamed';
+                var value = $field.val() || '';
+                console.log('AddIncident: Parsed field; Id=' + fieldId + '; Value="' + value + '"');
+                if (!value.trim()) {
+                    console.warn('AddIncident: Empty parsed field; Id=' + fieldId);
+                }
+            });
+
+            console.log('AddIncident: Initial state; ResolutionId=' + $resolutionSelect.val() + '; Comments count=' + $commentsSelect.find('option').length);
+
+            // Sync hidden input with select
+            $resolutionSelect.on('change', function () {
+                var resolutionId = $(this).val();
+                $resolutionHidden.val(resolutionId);
+                console.log('AddIncident: Synced ResolutionIdHidden=' + resolutionId);
+            });
+
+            // Trigger change for pre-selected resolution
+            if ($resolutionSelect.val() && parseInt($resolutionSelect.val()) > 0) {
+                console.log('AddIncident: Pre-selected ResolutionId=' + $resolutionSelect.val() + '; Triggering change');
+                $resolutionSelect.trigger('change');
+            }
+
+            $resolutionSelect.on('change', function () {
+                var resolutionId = parseInt($(this).val(), 10);
+                console.log('AddIncident: Resolution changed; ResolutionId=' + resolutionId + '; RawValue=' + $(this).val());
+
+                $commentsSelect.empty();
+                $commentsSelect.append('<option value="">Select a comment</option>');
+                $commentsSelect.append('<option value="Other">Other</option>');
+                $errorCodeInput.val('');
+                $customCommentDiv.hide();
+                $customCommentInput.val('');
+                $customCommentValidation.text('');
+
+                console.log('AddIncident: Comments reset; Options count=' + $commentsSelect.find('option').length);
+
+                if (isNaN(resolutionId) || resolutionId <= 0) {
+                    console.log('AddIncident: Invalid ResolutionId; Skipping AJAX');
+                    return;
+                }
+
+                console.log('AddIncident: Initiating AJAX for comments; ResolutionId=' + resolutionId);
+                $.ajax({
+                    url: '/Tickets/GetCommentsByResolution',
+                    type: 'GET',
+                    data: { resolutionId: resolutionId },
+                    dataType: 'json',
+                    cache: false,
+                    beforeSend: function () {
+                        console.log('AddIncident: AJAX sent; URL=/Tickets/GetCommentsByResolution?resolutionId=' + resolutionId);
+                    },
+                    success: function (data) {
+                        console.log('AddIncident: AJAX success; Response=', JSON.stringify(data));
+                        if (data.error) {
+                            console.error('AddIncident: AJAX error: ' + data.error);
+                            $commentsSelect.append('<option value="">Error: ' + data.error + '</option>');
+                            return;
+                        }
+                        if (!Array.isArray(data)) {
+                            console.error('AddIncident: Invalid response format; Got ' + typeof data);
+                            $commentsSelect.append('<option value="">No comments available</option>');
+                            return;
+                        }
+                        console.log('AddIncident: Processing ' + data.length + ' comments');
+                        $.each(data, function (index, comment) {
+                            console.log('AddIncident: Adding comment; Index=' + index + '; Comment=' + comment.comment + '; ErrorCode=' + comment.errorCode);
+                            $commentsSelect.append($('<option>').val(comment.comment).text(comment.comment));
+                        });
+                        console.log('AddIncident: Comments populated; Options count=' + $commentsSelect.find('option').length);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AddIncident: AJAX error; Status=' + status + '; Error=' + error + '; ResponseText=' + xhr.responseText);
+                        $commentsSelect.append('<option value="">Failed to load comments</option>');
+                    },
+                    complete: function () {
+                        console.log('AddIncident: AJAX complete');
+                    }
+                });
+            });
+
+            $commentsSelect.on('change', function () {
+                var comment = $(this).val();
+                var resolutionId = parseInt($resolutionSelect.val(), 10);
+                console.log('AddIncident: Comment changed; Comment=' + comment + '; ResolutionId=' + resolutionId);
+                $errorCodeInput.val('');
+                $customCommentDiv.hide();
+                $customCommentInput.val('');
+                $customCommentValidation.text('');
+                $customCommentInput.removeAttr('required');
+
+                if (comment === 'Other') {
+                    console.log('AddIncident: Other selected; Showing custom comment');
+                    $customCommentDiv.show();
+                    $customCommentInput.attr('required', 'required');
+                    return;
+                }
+
+                if (comment && !isNaN(resolutionId) && resolutionId > 0) {
+                    console.log('AddIncident: Fetching error code; Comment=' + comment + '; ResolutionId=' + resolutionId);
+                    $.ajax({
+                        url: '/Tickets/GetCommentsByResolution',
+                        type: 'GET',
+                        data: { resolutionId: resolutionId },
+                        dataType: 'json',
+                        cache: false,
+                        beforeSend: function () {
+                            console.log('AddIncident: Error code AJAX sent; URL=/Tickets/GetCommentsByResolution?resolutionId=' + resolutionId);
+                        },
+                        success: function (data) {
+                            console.log('AddIncident: Error code AJAX success; Response=', JSON.stringify(data));
+                            if (data.error) {
+                                console.error('AddIncident: Error code AJAX error: ' + data.error);
+                                return;
+                            }
+                            if (!Array.isArray(data)) {
+                                console.error('AddIncident: Invalid error code response format');
+                                return;
+                            }
+                            var selectedComment = data.find(c => c.comment === comment);
+                            if (selectedComment) {
+                                console.log('AddIncident: Setting ErrorCode=' + selectedComment.errorCode);
+                                $errorCodeInput.val(selectedComment.errorCode || '');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('AddIncident: Error code AJAX error; Status=' + status + '; Error=' + error + '; ResponseText=' + xhr.responseText);
+                        },
+                        complete: function () {
+                            console.log('AddIncident: Error code AJAX complete');
+                        }
+                    });
+                }
+            });
+
+            $form.on('submit', function (e) {
+                var comment = $commentsSelect.val();
+                var customComment = $customCommentInput.val().trim();
+                var resolutionId = $resolutionSelect.val();
+                console.log('AddIncident: Form submission; Comment=' + comment + '; CustomComment=' + customComment + '; ResolutionId=' + resolutionId);
+
+                // Log raw form data
+                var formData = $form.serializeArray();
+                console.log('AddIncident: Raw form data: ' + JSON.stringify(formData));
+
+                $customCommentValidation.text('');
+                if (comment === 'Other' && !customComment) {
+                    e.preventDefault();
+                    $customCommentValidation.text('Custom comment is required when "Other" is selected.');
+                    console.log('AddIncident: Blocked submission; Missing custom comment');
+                    return;
+                }
+
+                // Clear customComment if not "Other"
+                if (comment !== 'Other') {
+                    $customCommentInput.val('');
+                    $customCommentInput.removeAttr('required');
+                    console.log('AddIncident: Cleared customComment as not "Other"');
+                }
+
+                // Ensure ResolutionId is included
+                if (!resolutionId) {
+                    $resolutionSelect.val('');
+                    $resolutionHidden.val('');
+                    console.log('AddIncident: Ensured ResolutionId is empty if invalid');
+                }
+                else {
+                    $resolutionHidden.val(resolutionId);
+                    console.log('AddIncident: Ensured ResolutionIdHidden=' + resolutionId);
+                }
+
+                // Log form data again after modifications
+                formData = $form.serializeArray();
+                console.log('AddIncident: Final form data:');
+                $.each(formData, function (i, field) {
+                    console.log('AddIncident: Field; Name=' + field.name + '; Value="' + field.value + '"');
+                });
+            });
+        });
+    </script>
+}

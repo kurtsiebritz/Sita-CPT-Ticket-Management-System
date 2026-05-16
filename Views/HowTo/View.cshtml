@@ -1,0 +1,122 @@
+﻿@model SitaCptTicketApp.Models.HowTo
+@{
+    ViewData["Title"] = "View How-To";
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">@Model.Title</h1>
+        <div class="card mb-3">
+            <div class="card-body">
+                <p><strong>Company:</strong> @Model.Company?.CompanyName</p>
+                <p><strong>Created By:</strong> @($"{Model.CreatedBy?.Name}")</p>
+                <p><strong>Created Date:</strong> @Model.CreatedDate.ToString("dd MMM yyyy HH:mm")</p>
+            </div>
+        </div>
+        <h2 class="section-title">Steps</h2>
+        @if (Model.Steps != null && Model.Steps.Any())
+        {
+            int stepCounter = 1;
+            foreach (var step in Model.Steps.OrderBy(s => s.OrderIndex))
+            {
+                <div class="card mb-3 step-card">
+                    <div class="card-header">
+                        <span class="step-number">Step @stepCounter</span>
+                    </div>
+                    <div class="card-body">
+                        <p>@step.Instructions</p>
+                        @if (!string.IsNullOrEmpty(step.ImagePath))
+                        {
+                            <div class="image-container">
+                                <img src="@Url.Content($"~{step.ImagePath}")" alt="Step @stepCounter Image" class="step-image" />
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No image provided for this step.</p>
+                        }
+                    </div>
+                </div>
+                stepCounter++;
+            }
+        }
+        else
+        {
+            <p class="text-muted">No steps available.</p>
+        }
+        <div class="form-group mt-3">
+            <a asp-action="Index" class="btn btn-sita">Back to List</a>
+        </div>
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 1200px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .section-title {
+        font-size: 20px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+    }
+
+    .step-number {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0058cc;
+        margin-right: 10px;
+    }
+
+    .step-card {
+        position: relative;
+        padding-left: 50px; /* Space for step number alignment */
+    }
+
+    .image-container {
+        max-width: 600px; /* Smaller image size */
+        margin-top: 16px;
+    }
+
+    .step-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px; /* Rounded edges */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-muted {
+        font-size: 14px;
+    }
+
+    .btn-sita {
+        background-color: #0058cc;
+        color: #ffffff;
+        border: none;
+    }
+
+        .btn-sita:hover {
+            background-color: #003087;
+        }
+</style>

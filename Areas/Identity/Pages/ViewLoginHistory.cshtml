@@ -1,0 +1,183 @@
+﻿@page
+@model ViewLoginHistoryModel
+@{
+    ViewData["Title"] = "Login History";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="page-title">Login History</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-page="/AdminDashboard">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Login History</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">User Login History</h2>
+                    @if (Model.LoginHistory.Any())
+                    {
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Login Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var login in Model.LoginHistory)
+                                {
+                                    <tr>
+                                        <td>@(login.User?.FirstName +" " + login.User.Surname ?? login.Email)</td>
+                                        <td>@login.Email</td>
+                                        <td>@login.LoginTime.ToString("g")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination Controls -->
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" asp-page="./ViewLoginHistory" asp-route-pageNumber="@(Model.CurrentPage - 1)">Previous</a>
+                                </li>
+                                @for (var i = 1; i <= Model.TotalPages; i++)
+                                {
+                                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                        <a class="page-link" asp-page="./ViewLoginHistory" asp-route-pageNumber="@i">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                    <a class="page-link" asp-page="./ViewLoginHistory" asp-route-pageNumber="@(Model.CurrentPage + 1)">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                    else
+                    {
+                        <p>No login history available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        font-size: 2rem;
+        color: var(--primary);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+    .card {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: var(--primary);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: var(--text);
+    }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid var(--border);
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--border);
+            background-color: var(--card-bg);
+            color: var(--primary);
+        }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .pagination {
+        margin-top: 1rem;
+    }
+
+    .page-link {
+        color: var(--accent);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        color: var(--text-secondary);
+        pointer-events: none;
+        background-color: var(--card-bg);
+    }
+
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+        }
+
+        .table {
+            font-size: 0.875rem;
+        }
+
+            .table th,
+            .table td {
+                padding: 0.5rem;
+            }
+
+        .pagination {
+            font-size: 0.875rem;
+        }
+    }
+</style>

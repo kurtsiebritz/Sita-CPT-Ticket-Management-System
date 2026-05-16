@@ -1,0 +1,35 @@
+﻿@page
+@model SitaCptTicketApp.Areas.Identity.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Log out";
+    Layout = null;
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-header text-center">
+                    <h2>@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body text-center">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <p>You are being logged out...</p>
+                        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Content("/Identity/Account/Login")" method="post" id="logoutForm">
+                            <button type="submit" class="btn btn-primary">Confirm Logout</button>
+                        </form>
+                        <script>
+                            document.getElementById("logoutForm").submit();
+                        </script>
+                    }
+                    else
+                    {
+                        <p>You have successfully logged out of the application.</p>
+                        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Login">Return to Login</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

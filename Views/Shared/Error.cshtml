@@ -1,0 +1,24 @@
+﻿@model SitaCptTicketApp.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+<h1 class="text-danger">Error</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <p>@Model.ErrorMessage</p>
+}
+else if (TempData["ErrorMessage"] != null)
+{
+    <p>@TempData["ErrorMessage"]</p>
+}
+else
+{
+    <p>Please try again or contact support if the issue persists.</p>
+}
+
+@if (Model != null && Model.ShowRequestId)
+{
+    <p><strong>Request ID:</strong> @Model.RequestId</p>
+}

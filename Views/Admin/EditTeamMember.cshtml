@@ -1,0 +1,205 @@
+﻿@model SitaCptTicketApp.Models.SitaTeamMember
+
+@{
+    ViewData["Title"] = Model?.Id > 0 ? "Edit Team Member" : "Add Team Member";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SitaCptTicketApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@fortawesome/fontawesome-free@6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+<main>
+    <div class="main-container">
+        <div class="dashboard-content">
+            <h1 class="page-title">@ViewData["Title"]</h1>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
+
+            <div class="card">
+                <h2 class="card-title">Team Member Details</h2>
+                <form asp-action="EditTeamMember" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-group">
+                        <label asp-for="Name">Name</label>
+                        <input asp-for="Name" class="form-control" maxlength="50" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-sita">Save Changes</button>
+                        <a asp-action="EditTeamMembers" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    :root {
+        --primary: #003087;
+        --accent: #0058cc;
+        --secondary: #6c757d;
+        --danger: #dc3545;
+        --text: #333333;
+        --text-secondary: #666666;
+        --card-bg: #ffffff;
+        --background: #f5f7fa;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        background: var(--background);
+        margin: 0;
+        padding: 0;
+    }
+
+    .main-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 0 0 40px;
+        box-sizing: border-box;
+        padding: 20px;
+    }
+
+    .dashboard-content {
+        width: 100%;
+        max-width: 1200px;
+        padding: 20px 15px 0;
+    }
+
+    .page-title {
+        font-size: 32px;
+        color: var(--primary);
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-title {
+        font-size: 24px;
+        color: var(--primary);
+        margin-bottom: 10px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        color: var(--text);
+        margin-bottom: 5px;
+        display: block;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e0e7f0;
+        border-radius: 5px;
+        font-size: 14px;
+        color: var(--text);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.2s ease;
+    }
+
+    .btn-sita {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .btn-sita:hover {
+        background: var(--primary);
+    }
+
+    .btn-secondary {
+        background: var(--secondary);
+        color: #fff;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .alert {
+        font-size: 14px;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .text-danger {
+        display: block;
+        font-size: 12px;
+        color: var(--danger);
+        margin-top: 5px;
+    }
+
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 28px;
+        }
+
+        .card {
+            padding: 15px;
+        }
+
+        .form-group input {
+            font-size: 12px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+}
+</body>
+</html>

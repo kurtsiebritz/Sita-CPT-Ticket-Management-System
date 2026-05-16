@@ -1,0 +1,174 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="page-title">Admin Dashboard</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Admin Dashboard</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Manage Data</h2>
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        <div class="col">
+                            <a asp-action="EditComments" class="management-card text-decoration-none">
+                                <i class="ri-chat-3-line card-icon"></i>
+                                <h3>Comments</h3>
+                                <p>Edit ticket comments</p>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a asp-action="EditTeamMembers" class="management-card text-decoration-none">
+                                <i class="ri-group-line card-icon"></i>
+                                <h3>Team Members</h3>
+                                <p>Manage Sita team members</p>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a asp-action="EditSitaContracts" class="management-card text-decoration-none">
+                                <i class="ri-file-list-3-line card-icon"></i>
+                                <h3>Contracts</h3>
+                                <p>Edit Sita contracts</p>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a asp-action="EditResolutions" class="management-card text-decoration-none">
+                                <i class="ri-checkbox-circle-line card-icon"></i>
+                                <h3>Resolutions</h3>
+                                <p>Manage ticket resolutions</p>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a asp-action="EditUsers" class="management-card text-decoration-none">
+                                <i class="ri-user-settings-line card-icon"></i>
+                                <h3>Users</h3>
+                                <p>Edit user accounts</p>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a asp-page="/ViewLoginHistory" asp-area="Identity" class="management-card text-decoration-none">
+                                <i class="ri-history-line card-icon"></i>
+                                <h3>Login History</h3>
+                                <p>View user login history</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        font-size: 2rem;
+        color: var(--primary);
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+    .card {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: var(--primary);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .management-card {
+        display: block;
+        background-color: var(--card-bg);
+        border-radius: 0.25rem;
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--text);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .management-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background-color: #f9fafb;
+        }
+
+    .card-icon {
+        font-size: 2rem;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+    }
+
+    .management-card h3 {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .management-card p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    @@media (max-width: 768px) {
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+        }
+
+        .management-card {
+            padding: 1rem;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .management-card h3 {
+            font-size: 1rem;
+        }
+
+        .management-card p {
+            font-size: 0.75rem;
+        }
+    }
+</style>

@@ -1,0 +1,116 @@
+﻿@model SitaCptTicketApp.Models.HowTo
+@{
+    ViewData["Title"] = "Delete How-To Tutorial";
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">Delete How-To Tutorial</h1>
+        <h3>Are you sure you want to delete this How-To tutorial?</h3>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success" role="alert">@TempData["Success"]</div>
+        }
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@Model.Title</h5>
+                <p class="card-text"><strong>Contract:</strong> @Model.Company?.CompanyName</p>
+                <p class="card-text"><strong>Created By:</strong> @($"{Model.CreatedBy?.Name}")</p>
+                <p class="card-text"><strong>Created On:</strong> @Model.CreatedDate.ToString("dd MMM yyyy HH:mm")</p>
+                <p class="card-text"><strong>Steps:</strong></p>
+                <ul>
+                    @foreach (var step in Model.Steps.OrderBy(s => s.OrderIndex))
+                    {
+                        <li>
+                            Step @step.OrderIndex: @step.Instructions
+                            @if (!string.IsNullOrEmpty(step.ImagePath))
+                            {
+                                <br />
+
+                                <a href="@step.ImagePath" target="_blank">View Image</a>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 1200px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .card {
+        border-radius: 8px;
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    .card-text {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .alert-danger, .alert-success {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: #ffffff;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #ffffff;
+    }
+
+    ul {
+        font-size: 14px;
+        margin-left: 20px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('#delete-form').on('submit', function (e) {
+                console.log('Delete form submitted for How-To Id: @Model.Id');
+            });
+        });
+    </script>
+}

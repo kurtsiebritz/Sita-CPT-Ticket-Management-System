@@ -1,0 +1,222 @@
+﻿@model IEnumerable<SitaCptTicketApp.Models.HowTo>
+@{
+    ViewData["Title"] = "How-To Tutorials";
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">How-To Tutorials</h1>
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success" role="alert">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+        }
+        <div class="filter-container mb-3">
+            <form asp-action="Index" method="get" id="filter-form">
+                <div class="form-group">
+                    <label for="search" class="control-label">Search How-To Titles</label>
+                    <input type="text" id="search" name="search" class="form-control" value="@ViewBag.Search" autocomplete="off" placeholder="Enter title..." />
+                </div>
+                <div class="form-group">
+                    <label for="contractId" class="control-label">Filter by Contract</label>
+                    <select id="contractId" name="contractId" class="form-control" asp-items="ViewBag.Contracts">
+                        <option value="">All Contracts</option>
+                    </select>
+                </div>
+                <div class="form-group mt-2">
+                    <input type="submit" value="Search & Filter" class="btn btn-sita" />
+                    <a asp-action="Index" class="btn btn-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+        <p>
+            <a asp-action="Create" class="btn btn-sita">Create New</a>
+        </p>
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var howTo in Model)
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">@howTo.Title</h5>
+                                <p class="card-text">
+                                    <strong>Contract:</strong> @howTo.Company?.CompanyName<br />
+                                    <strong>Created By:</strong> @($"{howTo.CreatedBy?.Name}")<br />
+                                    <strong>Created Date:</strong> @howTo.CreatedDate.ToString("dd MMM yyyy HH:mm")
+                                </p>
+                                <a asp-action="View" asp-route-id="@howTo.Id" class="btn btn-sita btn-sm">View</a>
+                                <a asp-action="Delete" asp-route-id="@howTo.Id" class="btn btn-danger btn-sm">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No How-To tutorials available.</p>
+        }
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 1200px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .filter-container {
+        max-width: 400px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-control {
+        font-size: 14px;
+    }
+
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .card-title {
+        font-size: 18px;
+        color: #003087;
+    }
+
+    .card-text {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .btn-sita {
+        background-color: #0058cc;
+        color: #ffffff;
+        border: none;
+    }
+
+        .btn-sita:hover {
+            background-color: #003087;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: #ffffff;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #ffffff;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .alert-danger, .alert-success {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .text-muted {
+        font-size: 14px;
+    }
+
+    .ui-autocomplete {
+        max-height: 200px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #fff;
+        list-style: none;
+        padding: 0;
+        z-index: 1000;
+    }
+
+        .ui-autocomplete li {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            .ui-autocomplete li:hover {
+                background-color: #f0f0f0;
+            }
+</style>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize autocomplete
+            $('#search').autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '@Url.Action("SearchSuggestions", "HowTo")',
+                        dataType: 'json',
+                        data: { term: request.term },
+                        success: function (data) {
+                            console.log('Suggestions received: ' + data.join(', '));
+                            response(data);
+                        },
+                        error: function () {
+                            console.log('Error fetching suggestions');
+                            response([]);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    console.log('Selected suggestion: ' + ui.item.value);
+                    $('#search').val(ui.item.value);
+                    $('#filter-form').submit();
+                }
+            });
+
+            // Log contract filter selection
+            $('#contractId').on('change', function () {
+                console.log('ContractId selected: ' + this.value);
+            });
+
+            // Log form submission
+            $('#filter-form').on('submit', function () {
+                var search = $('#search').val();
+                var contractId = $('#contractId').val();
+                console.log('Form submitted with Search: ' + search + ', ContractId: ' + contractId);
+            });
+        });
+    </script>
+}

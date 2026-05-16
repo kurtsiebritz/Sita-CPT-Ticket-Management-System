@@ -1,0 +1,211 @@
+﻿@model List<SitaCptTicketApp.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Sita Ticket Management";
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">Ticket Management</h1>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <form asp-action="Index" method="get" class="filter-form">
+                <div class="filter-group">
+                    <label for="month">Select Month:</label>
+                    <select id="month" name="month" class="form-control">
+                        <option value="">All Months</option>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@i" selected="@(ViewBag.Month != null && i == ViewBag.Month)">@System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(i)</option>
+                        }
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="incidentNumber">Incident Number:</label>
+                    <input type="text" id="incidentNumber" name="incidentNumber" value="@ViewBag.IncidentNumber" placeholder="e.g., INC6667221" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-sita">Apply Filters</button>
+                <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                @if (ViewBag.Month != null)
+                {
+                    <a asp-action="ExportToCsv" asp-route-month="@ViewBag.Month" class="btn btn-secondary">Export to CSV</a>
+                }
+            </form>
+        </div>
+
+        <p>
+            <a asp-action="AddIncident" class="btn btn-sita">Add Incident</a>
+        </p>
+        <h3 class="ticket-subtitle">Tickets</h3>
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Incident Number</th>
+                            <th>Priority</th>
+                            <th>Short Description</th>
+                            <th>Resolution</th>
+                            <th>Error Code</th>
+                            <th>Comments</th>
+                            <th>Close Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ticket in Model)
+                        {
+                            <tr>
+                                <td>@ticket.IncidentNumber</td>
+                                <td>@ticket.Priority</td>
+                                <td>@ticket.ShortDescription</td>
+                                <td>@(ticket.Resolution?.Name ?? "N/A")</td>
+                                <td>@ticket.ErrorCode</td>
+                                <td>@ticket.Comments</td>
+                                <td>@(ticket.CloseTime.HasValue ? ticket.CloseTime.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="no-tickets">No tickets found.</p>
+        }
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 1200px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .ticket-subtitle {
+        font-size: 20px;
+        font-weight: 500;
+        color: #333;
+        margin-top: 24px;
+        margin-bottom: 16px;
+    }
+
+    .btn-sita {
+        background-color: #0058cc;
+        border-color: #0058cc;
+        font-weight: normal;
+        color: #fff;
+    }
+
+        .btn-sita:hover {
+            background-color: #003d8f;
+            border-color: #003d8f;
+            color: #fff;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        font-weight: normal;
+        margin-left: 10px;
+        color: #fff;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+            color: #fff;
+        }
+
+    .table th, .table td {
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .table th {
+        background-color: #f5f7fa;
+        color: #333;
+    }
+
+    .no-tickets {
+        font-size: 16px;
+        color: #666;
+        text-align: center;
+        margin-top: 24px;
+    }
+
+    .alert {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .filter-section {
+        margin-bottom: 20px;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .filter-group label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 200px;
+        }
+</style>
+
+@section Scripts {
+    <script>
+        // Clear filters and submit form
+        function clearFilters() {
+            console.log("Clearing filters");
+            document.getElementById('month').value = '';
+            document.getElementById('incidentNumber').value = '';
+            document.querySelector('form').submit();
+        }
+
+        // Log page load
+        console.log("Index: Page loaded at " + new Date().toISOString());
+    </script>
+}

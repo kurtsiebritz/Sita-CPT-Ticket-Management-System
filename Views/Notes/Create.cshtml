@@ -1,0 +1,145 @@
+﻿@model SitaCptTicketApp.Controllers.NoteViewModel
+@{
+    ViewData["Title"] = "Create Note";
+}
+
+<main>
+    <div class="ticket-container">
+        <h1 class="ticket-title">Create Note</h1>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success" role="alert">@TempData["Success"]</div>
+        }
+        <form asp-action="Create" method="post" enctype="multipart/form-data" id="create-form">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" placeholder="Enter note title" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CompanyId" class="control-label">Company</label>
+                <select asp-for="CompanyId" class="form-control" asp-items="@(new SelectList(Model.Companies.Items, "Id", "CompanyName", Model.CompanyId))">
+                    <option value="">Select a company</option>
+                </select>
+                <span asp-validation-for="CompanyId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedById" class="control-label">Created By</label>
+                <select asp-for="CreatedById" class="form-control" asp-items="@(new SelectList(Model.CreatedByTeamMembers.Items, "Id", "Name", Model.CreatedById))">
+                    <option value="">Select a team member</option>
+                </select>
+                <span asp-validation-for="CreatedById" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Content" class="control-label"></label>
+                <textarea asp-for="Content" class="form-control" rows="6" placeholder="Enter note content"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="document" class="control-label">Attach Document (optional)</label>
+                <input type="file" name="document" accept=".pdf,.doc,.docx,.txt" class="form-control-file" />
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" value="Create" class="btn btn-sita" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+    .ticket-container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 32px;
+        max-width: 1200px;
+        margin: 20px auto;
+        text-align: left;
+    }
+
+    .ticket-title {
+        font-size: 24px;
+        font-weight: 500;
+        color: #003087;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-control, .form-control-file {
+        font-size: 14px;
+    }
+
+    .text-danger {
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .alert-danger, .alert-success {
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .btn-sita {
+        background-color: #0058cc;
+        color: #ffffff;
+        border: none;
+    }
+
+        .btn-sita:hover {
+            background-color: #003087;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #ffffff;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Ensure client-side validation
+            $.validator.unobtrusive.parse('#create-form');
+
+            // Log CompanyId and CreatedById selection
+            $('select[name="CompanyId"]').on('change', function () {
+                console.log('CompanyId selected: ' + this.value);
+            });
+            $('select[name="CreatedById"]').on('change', function () {
+                console.log('CreatedById selected: ' + this.value);
+            });
+
+            // Log file selection
+            $(document).on('change', 'input[type="file"]', function (e) {
+                console.log(`File selected for ${e.target.name}: `, e.target.files[0]?.name, e.target.files[0]?.size);
+            });
+
+            // Log form submission
+            $('#create-form').on('submit', function (e) {
+                if ($(this).valid()) {
+                    console.log('Form is valid, submitting...');
+                } else {
+                    console.log('Form is invalid, client-side validation failed.');
+                    var errors = $(this).validate().errorList.map(function (err) {
+                        return $(err.element).attr('name') + ': ' + err.message;
+                    });
+                    console.log('Client-side validation errors: ' + errors.join('; '));
+                }
+                var formData = new FormData(this);
+                for (var pair of formData.entries()) {
+                    console.log(`FormData: ${pair[0]} = ${pair[1].name || pair[1]}`);
+                }
+            });
+        });
+    </script>
+}

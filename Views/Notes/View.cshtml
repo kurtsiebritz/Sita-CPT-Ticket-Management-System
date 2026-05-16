@@ -1,0 +1,22 @@
+﻿@model SitaCptTicketApp.Models.Note
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<h1>@Model.Title</h1>
+<p>Company: @Model.Company?.CompanyName</p>
+<p>Created by: @Model.CreatedBy?.Name on @Model.CreatedDate.ToString("g")</p>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Content</h5>
+        <p class="card-text">@Model.Content</p>
+        @if (!string.IsNullOrEmpty(Model.DocumentPath))
+        {
+            <p>
+                <strong>Attached Document:</strong>
+                <a href="@Model.DocumentPath" download class="btn btn-outline-primary btn-sm">Download</a>
+            </p>
+        }
+    </div>
+</div>
